@@ -62,13 +62,18 @@ export default function Dashboard() {
   function toggleLang() { const nl = lang === 'en' ? 'fr' : 'en'; setLang(nl); store.setLang(nl); }
 
   function simulateDiscordLogin() {
-    const fakeUser = { username: 'Architect_' + Math.random().toString(36).slice(2, 7), avatar: null, id: Math.random().toString(36).slice(2, 10) };
+    const password = prompt(lang === 'fr' ? '🔐 Mot de passe administrateur:' : '🔐 Admin password:');
+    if (password !== 'MALIPUISSANCE') {
+        showToast(lang === 'fr' ? '❌ Mot de passe incorrect!' : '❌ Wrong password!');
+        return;
+    }
+    const fakeUser = { username: 'Architect', avatar: null, id: 'admin' };
     setDiscordUser(fakeUser);
     store.setUser(fakeUser);
     setAdminMode(true);
     localStorage.setItem('architect-admin', 'true');
     showToast('✅ ' + (lang === 'fr' ? 'Connecté en tant qu\'administrateur' : 'Logged in as administrator'));
-  }
+}
 
   function logout() {
     setDiscordUser(null); store.clearUser(); setAdminMode(false);
