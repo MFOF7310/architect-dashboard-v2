@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { getStats, getServers, getServerSettings, getCommands, updateServerSetting } from '@/lib/api';
-import { getStore, translations } from '@/lib/store';
+import { getStats, getServers, getServerSettings, getCommands, updateServerSetting } from '../lib/api';
+import { getStore, translations } from '../lib/store';
 import './globals.css';
 
 // ==================== MAIN DASHBOARD ====================
