@@ -1,0 +1,5 @@
+.env
+.env.local
+.envy*.local
+node-modules/
+.next/
