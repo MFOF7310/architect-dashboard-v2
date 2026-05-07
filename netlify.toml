@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+
+[build.environment]
+  SECRETS_SCAN_ENABLED = "false"
+
+[[redirects]]
+  from = "/api/*"
+  to = "http://prem-eu1.bot-hosting.net:20582/api/:splat"
+  status = 200
+  force = true
