@@ -33,6 +33,7 @@ export default function Dashboard() {
     if (u) setDiscordUser(u);
     const am = localStorage.getItem('architect-admin') === 'true';
     setAdminMode(am);
+    checkDiscordCallback();
   }, []);
 
   const loadData = useCallback(async () => {
@@ -61,18 +62,33 @@ export default function Dashboard() {
   function toggleTheme() { const nt = theme === 'dark' ? 'light' : 'dark'; setTheme(nt); store.setTheme(nt); }
   function toggleLang() { const nl = lang === 'en' ? 'fr' : 'en'; setLang(nl); store.setLang(nl); }
 
-  function simulateDiscordLogin() {
-    const password = prompt(lang === 'fr' ? '🔐 Mot de passe administrateur:' : '🔐 Admin password:');
-    if (password !== 'MALIPUISSANCE') {
-        showToast(lang === 'fr' ? '❌ Mot de passe incorrect!' : '❌ Wrong password!');
-        return;
+  function realDiscordLogin() {
+    window.location.href = '/functions/auth-callback';
+}
+
+function checkDiscordCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const userParam = params.get('user');
+    if (userParam) {
+        try {
+            const userData = JSON.parse(decodeURIComponent(userParam));
+            const YOUR_DISCORD_ID = '1284944736620253296';
+            setDiscordUser(userData);
+            store.setUser(userData);
+            
+            if (userData.id === YOUR_DISCORD_ID) {
+                setAdminMode(true);
+                localStorage.setItem('architect-admin', 'true');
+                showToast('✅ ' + (lang === 'fr' ? 'Connecté en tant qu\'administrateur' : 'Logged in as administrator'));
+            } else {
+                showToast(lang === 'fr' ? '👤 Connecté (Admin uniquement)' : '👤 Logged in (Admin only)');
+            }
+            
+            window.history.replaceState({}, '', '/');
+        } catch(e) {
+            showToast(lang === 'fr' ? '❌ Échec de connexion' : '❌ Login failed');
+        }
     }
-    const fakeUser = { username: 'Architect', avatar: null, id: 'admin' };
-    setDiscordUser(fakeUser);
-    store.setUser(fakeUser);
-    setAdminMode(true);
-    localStorage.setItem('architect-admin', 'true');
-    showToast('✅ ' + (lang === 'fr' ? 'Connecté en tant qu\'administrateur' : 'Logged in as administrator'));
 }
 
   function logout() {
@@ -139,9 +155,9 @@ export default function Dashboard() {
               <button onClick={logout} style={s.smallBtn}>{t.logout}</button>
             </div>
           ) : (
-            <button onClick={simulateDiscordLogin} style={{ ...s.smallBtn, background: '#5865F2', color: '#fff', border: 'none' }}>
-              🔐 {t.discordLogin}
-            </button>
+            <button onClick={realDiscordLogin} style={{ ...s.smallBtn, background: '#5865F2', color: '#fff', border: 'none' }}>
+    🔐 {t.discordLogin}
+</button>
           )}
 
           <button onClick={toggleLang} style={s.iconBtn}>{lang === 'en' ? '🇫🇷' : '🇬🇧'}</button>
