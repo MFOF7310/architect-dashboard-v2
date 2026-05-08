@@ -1,7 +1,8 @@
 export async function onRequest(context) {
-  const { request } = context;
+  const { request, env } = context;
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
+  const CLIENT_SECRET = env.DISCORD_CLIENT_SECRET || 'YOUR_FALLBACK_SECRET';
 
   if (!code) {
     const clientId = '1472707869257367676';
@@ -15,7 +16,7 @@ export async function onRequest(context) {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       client_id: '1472707869257367676',
-      client_secret: 'YOUR_DISCORD_CLIENT_SECRET',
+      client_secret: CLIENT_SECRET,
       grant_type: 'authorization_code',
       code,
       redirect_uri: 'https://5fcd4430.architect-dashboard-v2.pages.dev/functions/auth-callback',
