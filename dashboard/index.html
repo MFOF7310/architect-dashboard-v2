@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦅 ARCHITECT CG-223 | Neural Dashboard</title>
+    
+    <!-- Discord OAuth2 Config -->
+    <meta name="discord-client-id" content="YOUR_CLIENT_ID">
+    <meta name="discord-redirect" content="https://architect-dashboard-v2.pages.dev/callback">
+    
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --card: #12121a;
+            --border: #1e1e2e;
+            --accent: #2ecc71;
+            --gold: #f1c40f;
+            --text: #cdd6f4;
+            --muted: #6c7086;
+            --danger: #e74c3c;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        /* === NAVBAR === */
+        .navbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .navbar-brand {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .navbar-brand .eagle { font-size: 1.8rem; }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-discord {
+            background: #5865F2;
+            color: white;
+        }
+        .btn-discord:hover { background: #4752c4; transform: translateY(-1px); }
+        
+        .btn-invite {
+            background: var(--accent);
+            color: #0a0a0f;
+        }
+        .btn-invite:hover { background: #27ae60; transform: translateY(-1px); }
+        
+        .btn-logout {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+        
+        /* === HERO === */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--accent), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+        
+        .hero .subtitle {
+            color: var(--muted);
+            font-size: 1.2rem;
+            margin-bottom: 32px;
+        }
+        
+        .hero .node-badge {
+            display: inline-block;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+        
+        /* === STATS GRID === */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            max-width: 900px;
+            margin: 0 auto 60px;
+            padding: 0 20px;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .stat-card .label {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        
+        /* === SERVER LIST === */
+        .section {
+            max-width: 900px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+        }
+        
+        .section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .server-list {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .server-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: border-color 0.2s;
+        }
+        .server-card:hover { border-color: var(--accent); }
+        
+        .server-card img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+        }
+        
+        .server-card .info { flex: 1; }
+        .server-card .name { font-weight: 600; }
+        .server-card .meta { color: var(--muted); font-size: 0.85rem; }
+        
+        /* === DASHBOARD (Logged In) === */
+        .dashboard { display: none; }
+        .logged-in .landing { display: none; }
+        .logged-in .dashboard { display: block; }
+        
+        .user-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-bar img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+        
+        /* === RESPONSIVE === */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .navbar { padding: 12px 16px; }
+        }
+        
+        /* === LOADING === */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span class="eagle">🦅</span> ARCHITECT CG-223
+        </div>
+        <div id="navActions">
+            <!-- Filled by JS -->
+        </div>
+    </nav>
+    
+    <!-- LANDING (Not logged in) -->
+    <div class="landing" id="landing">
+        <div class="hero">
+            <div class="node-badge">📍 NODE: BAMAKO_223 🇲🇱</div>
+            <h1>Neural Dashboard</h1>
+            <p class="subtitle">Real-time monitoring for the Eagle Community grid</p>
+            <a href="/api/login" class="btn btn-discord">
+                🔐 Login with Discord
+            </a>
+        </div>
+        
+        <div class="stats-grid" id="publicStats">
+            <div class="stat-card">
+                <div class="value" id="statGuilds">—</div>
+                <div class="label">Servers</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="statUsers">—</div>
+                <div class="label">Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="statCommands">—</div>
+                <div class="label">Commands</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="statUptime">—</div>
+                <div class="label">Uptime</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- DASHBOARD (Logged in) -->
+    <div class="dashboard" id="dashboard">
+        <div class="section">
+            <h2>🏛️ Your Servers</h2>
+            <div class="server-list" id="serverList">
+                <div class="loading">Loading your servers</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // === CONFIGURATION ===
+        const API_URL = 'https://architect-dashboard-v2.pages.dev/api';
+        const DISCORD_CLIENT_ID = document.querySelector('meta[name="discord-client-id"]')?.content;
+        const DISCORD_REDIRECT = document.querySelector('meta[name="discord-redirect"]')?.content;
+        
+        // === CHECK LOGIN STATE ===
+        async function checkAuth() {
+            try {
+                const res = await fetch(`${API_URL}/me`, { credentials: 'include' });
+                if (res.ok) {
+                    const user = await res.json();
+                    showDashboard(user);
+                } else {
+                    showLanding();
+                }
+            } catch {
+                showLanding();
+            }
+        }
+        
+        function showLanding() {
+            document.body.classList.remove('logged-in');
+            document.getElementById('navActions').innerHTML = `
+                <a href="/api/login" class="btn btn-discord">🔐 Login with Discord</a>
+                <a href="https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&permissions=8&scope=bot%20applications.commands" class="btn btn-invite" target="_blank">➕ Add to Server</a>
+            `;
+            loadPublicStats();
+        }
+        
+        function showDashboard(user) {
+            document.body.classList.add('logged-in');
+            document.getElementById('navActions').innerHTML = `
+                <div class="user-bar">
+                    <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="${user.username}">
+                    <span>${user.username}</span>
+                </div>
+                <a href="/api/logout" class="btn btn-logout">Logout</a>
+            `;
+            loadUserServers();
+        }
+        
+        // === PUBLIC STATS ===
+        async function loadPublicStats() {
+            try {
+                const res = await fetch(`${API_URL}/health`);
+                const data = await res.json();
+                document.getElementById('statGuilds').textContent = data.servers || '—';
+                document.getElementById('statUsers').textContent = (data.users || 0).toLocaleString();
+                document.getElementById('statCommands').textContent = data.commands || '—';
+                document.getElementById('statUptime').textContent = formatUptime(data.uptime || 0);
+            } catch(e) {
+                console.log('Stats unavailable — bot may be offline');
+            }
+        }
+        
+        // === USER SERVERS (Filtered: only shows servers user can manage) ===
+        async function loadUserServers() {
+            const container = document.getElementById('serverList');
+            try {
+                const res = await fetch(`${API_URL}/servers`, { credentials: 'include' });
+                if (!res.ok) throw new Error('Failed to load servers');
+                
+                const servers = await res.json();
+                
+                if (servers.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center;padding:40px;color:var(--muted)">
+                            <p>You don't manage any servers with ARCHITECT CG-223 yet.</p>
+                            <a href="https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&permissions=8&scope=bot%20applications.commands" 
+                               class="btn btn-invite" style="margin-top:16px" target="_blank">
+                                ➕ Add Bot to Your Server
+                            </a>
+                        </div>`;
+                    return;
+                }
+                
+                container.innerHTML = servers.map(s => `
+                    <div class="server-card">
+                        <img src="${s.icon || 'https://cdn.discordapp.com/embed/avatars/0.png'}" alt="${s.name}">
+                        <div class="info">
+                            <div class="name">${s.name}</div>
+                            <div class="meta">👥 ${s.members.toLocaleString()} members</div>
+                        </div>
+                        <a href="/server/${s.id}" class="btn btn-discord" style="font-size:0.8rem">⚙️ Manage</a>
+                    </div>
+                `).join('');
+                
+            } catch(e) {
+                container.innerHTML = '<div class="loading">Unable to load servers</div>';
+            }
+        }
+        
+        function formatUptime(seconds) {
+            const d = Math.floor(seconds / 86400);
+            const h = Math.floor((seconds % 86400) / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            if (d > 0) return `${d}d ${h}h`;
+            if (h > 0) return `${h}h ${m}m`;
+            return `${m}m`;
+        }
+        
+        // === INIT ===
+        checkAuth();
+    </script>
+</body>
+</html>
