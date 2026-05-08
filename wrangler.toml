@@ -1,7 +1,3 @@
 name = "architect-dashboard-v2"
-compatibility_date = "2026-05-07"
+compatibility_date = "2026-05-08"
 compatibility_flags = ["nodejs_compat"]
-
-[[routes]]
-pattern = "/api/*"
-script = "./functions/api-proxy.js"
